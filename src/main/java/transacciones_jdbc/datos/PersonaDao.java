@@ -1,7 +1,8 @@
-package manejo_jdbc.datos;
+package transacciones_jdbc.datos;
 
-import manejo_jdbc.datos.Conexion;
-import manejo_jdbc.domain.Persona;
+
+
+import transacciones_jdbc.domain.Persona;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -19,17 +20,29 @@ public class PersonaDao {
     private static final String SQL_UPDATE = "UPDATE persona SET nombre = ?, apellido = ?, email = ?, telefono = ? WHERE id_persona = ? ";
     private static final String SQL_DELETE = "DELETE FROM persona WHERE id_persona = ? ";
 
-    public List<Persona> seleccionar(){
+    private Connection conexionTransaccional;
+
+    public PersonaDao() {
+
+    }
+
+    public PersonaDao(Connection conexionTransaccional) {
+        this.conexionTransaccional = conexionTransaccional;
+    }
+
+    public List<Persona> seleccionar() throws SQLException{
 
         List<Persona> personas = new ArrayList<>();
 
-        Connection connection = Conexion.getConexion();
+        Connection connection = null;
 
         PreparedStatement statement = null;
 
         ResultSet resultSet = null;
 
         try {
+
+            connection = (this.conexionTransaccional != null) ? this.conexionTransaccional: manejo_jdbc.datos.Conexion.getConexion();
 
             statement = connection.prepareStatement(PersonaDao.SQL_SELECT);
 
@@ -49,28 +62,33 @@ public class PersonaDao {
             }
 
 
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+//        catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         finally {
-            Conexion.close(resultSet);
-            Conexion.close(statement);
-            Conexion.close(connection);
+            manejo_jdbc.datos.Conexion.close(resultSet);
+            manejo_jdbc.datos.Conexion.close(statement);
+
+            if(this.conexionTransaccional == null)
+                manejo_jdbc.datos.Conexion.close(connection);
         }
 
         return personas;
 
     }
 
-    public int insertar(Persona persona){
+    public int insertar(Persona persona) throws SQLException{
 
-        Connection connection = Conexion.getConexion();
+        Connection connection = null;
 
         PreparedStatement statement = null;
 
         int registros = 0;
 
         try {
+
+            connection = (this.conexionTransaccional != null) ? this.conexionTransaccional: manejo_jdbc.datos.Conexion.getConexion();
 
             statement = connection.prepareStatement(PersonaDao.SQL_INSERT);
             statement.setString(1, persona.getNombre());
@@ -80,27 +98,31 @@ public class PersonaDao {
 
             registros = statement.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+//        catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         finally {
-            Conexion.close(statement);
-            Conexion.close(connection);
+            manejo_jdbc.datos.Conexion.close(statement);
+            if(this.conexionTransaccional == null)
+                manejo_jdbc.datos.Conexion.close(connection);
         }
 
         return registros;
 
     }
 
-    public int actualizar(Persona persona){
+    public int actualizar(Persona persona) throws SQLException{
 
-        Connection connection = Conexion.getConexion();
+        Connection connection = null;
 
         PreparedStatement statement = null;
 
         int registros = 0;
 
         try {
+
+            connection = (this.conexionTransaccional != null) ? this.conexionTransaccional: manejo_jdbc.datos.Conexion.getConexion();
 
             statement = connection.prepareStatement(PersonaDao.SQL_UPDATE);
             statement.setString(1, persona.getNombre());
@@ -111,21 +133,24 @@ public class PersonaDao {
 
             registros = statement.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+//        catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         finally {
-            Conexion.close(statement);
-            Conexion.close(connection);
+            manejo_jdbc.datos.Conexion.close(statement);
+
+            if(this.conexionTransaccional == null)
+                manejo_jdbc.datos.Conexion.close(connection);
         }
 
         return registros;
 
     }
 
-    public int borrar(Persona persona){
+    public int borrar(Persona persona) throws SQLException{
 
-        Connection connection = Conexion.getConexion();
+        Connection connection = null;
 
         PreparedStatement statement = null;
 
@@ -133,26 +158,30 @@ public class PersonaDao {
 
         try {
 
+            connection = (this.conexionTransaccional != null) ? this.conexionTransaccional: manejo_jdbc.datos.Conexion.getConexion();
+
             statement = connection.prepareStatement(PersonaDao.SQL_DELETE);
             statement.setInt(1, persona.getIdPersona());
 
             registros = statement.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+//        catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         finally {
-            Conexion.close(statement);
-            Conexion.close(connection);
+            manejo_jdbc.datos.Conexion.close(statement);
+            if(this.conexionTransaccional == null)
+                manejo_jdbc.datos.Conexion.close(connection);
         }
 
         return registros;
 
     }
 
-    public Persona callSpGetRegistro(Persona persona){
+    public Persona callSpGetRegistro(Persona persona) throws SQLException{
 
-        Connection connection = Conexion.getConexion();
+        Connection connection = null;
 
         CallableStatement statement = null;
 
@@ -161,6 +190,8 @@ public class PersonaDao {
         ResultSet resultSet = null;
 
         try {
+
+            connection = (this.conexionTransaccional != null) ? this.conexionTransaccional: manejo_jdbc.datos.Conexion.getConexion();
 
             statement = connection.prepareCall(PersonaDao.SQL_SELECT_ONE);
 
@@ -192,12 +223,13 @@ public class PersonaDao {
 
         }
 
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         finally {
-            Conexion.close(statement);
-            Conexion.close(connection);
+            manejo_jdbc.datos.Conexion.close(statement);
+            if(this.conexionTransaccional == null)
+                Conexion.close(connection);
         }
 
         return retornado;
